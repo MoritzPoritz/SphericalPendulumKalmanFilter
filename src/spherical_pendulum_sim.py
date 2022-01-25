@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import utils 
 import sys
+from plot_pendulum import plot_pendulum
 
 DEG_TO_RAD = np.pi/180
 
@@ -34,7 +35,10 @@ class SphericalPendulumSimulation():
         return np.array([d2_theta, d2_phi])
     
     def f(self, x, dt):
-        x_new = x + self.state_first_deriv(x) * dt
+        n = 1000
+        x_new = x
+        for i in range(n):
+            x_new = x_new + self.state_first_deriv(x_new) * dt/n
         return x_new
 
     def run(self):
@@ -73,6 +77,9 @@ def main(argv):
         pendulum = SphericalPendulumSimulation([theta, phi, dtheta, dphi], pendulum_length, dt, N)
         pendulum.run()
         pendulum.write_sim_data()
+        if (argv[8] == 'plot'):
+            print("plotting...")
+            plot_pendulum(pendulum.return_sim_values()[1])
 
 if __name__ == "__main__":
     main(sys.argv)
