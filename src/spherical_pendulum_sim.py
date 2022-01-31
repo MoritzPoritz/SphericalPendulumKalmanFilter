@@ -77,9 +77,7 @@ def main(argv):
         pendulum = SphericalPendulumSimulation([theta, phi, dtheta, dphi], pendulum_length, dt, N)
         pendulum.run()
         pendulum.write_sim_data()
-        if (argv[8] == 'plot'):
-            print("plotting...")
-            plot_pendulum(pendulum.return_sim_values()[1])
+        
 
 if __name__ == "__main__":
     main(sys.argv)
