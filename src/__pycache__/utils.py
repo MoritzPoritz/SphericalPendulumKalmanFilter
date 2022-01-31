@@ -21,7 +21,12 @@ def write_to_csv(states, pos, Ts):
         'position_x': pos[:,0],
         'position_y': pos[:,1],
         'position_z': pos[:,2],
-        'timestamps': Ts
+        'timestep': Ts
         })
-    df.to_csv('simulation.txt', sep=',')
+    df.to_csv('simulation.csv', sep=',')
+
+
+def read_from_csv(path):
+    df = pd.read_csv(path, skipinitialspace=True)
+    return df
 

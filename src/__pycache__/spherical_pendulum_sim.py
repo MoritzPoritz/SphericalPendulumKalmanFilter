@@ -1,6 +1,7 @@
 from turtle import position
 import numpy as np
 import pandas as pd
+from sympy import false
 import utils 
 import sys
 from plot_pendulum import plot_pendulum
@@ -9,6 +10,7 @@ DEG_TO_RAD = np.pi/180
 
 class SphericalPendulumSimulation(): 
     def __init__(self, x, pendulum_length, dt, N):
+        print("Beginning Simulation!")
         self.x = [x]
         self.g = 9.81
         self.l = pendulum_length
@@ -35,7 +37,7 @@ class SphericalPendulumSimulation():
         return np.array([d2_theta, d2_phi])
     
     def f(self, x, dt):
-        n = 1000
+        n = 100
         x_new = x
         for i in range(n):
             x_new = x_new + self.state_first_deriv(x_new) * dt/n
@@ -59,26 +61,28 @@ class SphericalPendulumSimulation():
 
 
 
-def main(argv): 
-    if argv[1] == 'help':
-        print("Please type: " + 'theta(degrees), phi(degrees), theta\'(degrees), phi\'(degrees), pendulum__length, timestep, number_of_steps')
-        if argv[2] == 'values':
-            print('Good starting values are:')
-            print('72, 0, 0, 42.8')
-            print('45, 0, 0, 30')
-    else: 
-        theta = float(argv[1]) * DEG_TO_RAD
-        phi = float(argv[2]) * DEG_TO_RAD
-        dtheta = float(argv[3]) * DEG_TO_RAD
-        dphi = float(argv[4]) * DEG_TO_RAD
-        pendulum_length = float(argv[5])
-        dt = float(argv[6])
-        N = int(argv[7])
+def main(config):
+    if config.empty is False:
+        theta = float(config['theta']) * DEG_TO_RAD
+        phi = float(config['phi']) * DEG_TO_RAD
+        dtheta = float(config['dtheta']) * DEG_TO_RAD
+        dphi = float(config['dphi']) * DEG_TO_RAD
+        pendulum_length = float(config['pendulum__length'])
+        dt = float(config['timestep'])
+        T = config['sim_time']
+        N = int(T / dt)
+        print("Total Samples: {}".format(N))
+        
         pendulum = SphericalPendulumSimulation([theta, phi, dtheta, dphi], pendulum_length, dt, N)
         pendulum.run()
         pendulum.write_sim_data()
-        
+        print("Simulation finished, wrote Data!")
+        plot_pendulum()
+    else:
+        print("No Configuration found!")
 
 if __name__ == "__main__":
-    main(sys.argv)
+    config = utils.read_from_csv('config.csv')
+    main(config)
+
 
