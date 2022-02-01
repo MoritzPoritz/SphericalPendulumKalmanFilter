@@ -2,7 +2,7 @@ from turtle import position
 import utils
 import numpy as np 
 
-std_x, std_y, std_z = .01,.01,.01
+std_x, std_y, std_z = .1,.1,.1
 
 
 def mess_sim_data(): 

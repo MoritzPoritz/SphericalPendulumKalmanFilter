@@ -77,12 +77,15 @@ def main(config):
         pendulum.run()
         pendulum.write_sim_data()
         print("Simulation finished, wrote Data!")
-        plot_pendulum()
+        #plot_pendulum()
     else:
         print("No Configuration found!")
 
 if __name__ == "__main__":
-    config = utils.read_from_csv('config.csv')
+    if (len(sys.argv) == 2): 
+        config = utils.read_from_csv(str(sys.argv[1])+'.csv')
+    else:
+        config = utils.read_from_csv('config.csv')
     main(config)
 
 

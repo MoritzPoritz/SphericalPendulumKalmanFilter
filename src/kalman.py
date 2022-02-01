@@ -86,7 +86,7 @@ if __name__ == "__main__":
     kalman = PendulumUKF(x, positions, 0.01)
     kalman_positions = np.array(kalman.run())
     utils.write_to_csv(x,kalman_positions,ts, "kalman")
-    print(kalman.ukf.residual_x, kalman.ukf.residual_z)
+    print('STD UKF', np.std(kalman_positions - positions))
 
 
 
