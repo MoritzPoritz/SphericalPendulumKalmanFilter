@@ -52,7 +52,7 @@ class PendulumUKF():
     def __init__(self, x, positions, dt):
         self.sigmas = MerweScaledSigmaPoints(4, alpha=.1, beta=2, kappa=-1)
        
-        self.std_x, self.std_y, self.std_z = .02,.02,.02
+        self.std_x, self.std_y, self.std_z = .4,.4,.4
         self.positions = positions
 
         self.ukf = UKF(dim_x=4, dim_z=3,fx=f, hx=h, dt=dt, points=self.sigmas)
@@ -63,8 +63,11 @@ class PendulumUKF():
 
     def run(self):
         uxs = []
-        for p in self.positions:
+        for i,p in enumerate(self.positions):
             self.ukf.predict()
+            #print(self.ukf.x)
+            #if (i < 40 or i > 600):
+                #print("updating", i)
             self.ukf.update(p)
             uxs.append(self.ukf.x.copy())
 
@@ -75,9 +78,6 @@ class PendulumUKF():
 
         ux_positions = np.array(ux_positions)
         return ux_positions
-
-
-
 
 if __name__ == "__main__":
     simulation = utils.read_from_csv('messy.csv')
