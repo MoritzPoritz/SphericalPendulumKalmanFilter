@@ -1,3 +1,4 @@
+from re import X
 from turtle import position
 import numpy as np
 import pandas as pd
@@ -25,6 +26,26 @@ class SphericalPendulumSimulation():
         
         return np.concatenate([dq, dq2])
 
+
+    def second_deriv_theta(self, x):
+        theta, phi, d_theta, d_phi = x
+
+        d2_theta = d_phi**2 * np.sin(theta) * np.cos(theta) - (self.g / self.l) * np.sin(theta)
+
+        return d2_theta
+
+    def second_deriv_phi(self, x):
+        theta, phi, d_theta, d_phi = x
+        t = np.tan(theta)
+
+        d2_phi = -2 * d_phi * d_theta * (np.cos(theta) / np.sin(theta))
+        #d2_phi = -2 * d_theta * d_phi / t
+        if (t == 0):
+            print ('t is 0')
+            
+        return d2_phi
+        
+
     def second_deriv_theta_phi(self, x):
         theta, phi, d_theta, d_phi = x
         c, s, t = np.cos(theta), np.sin(theta), np.tan(theta)
@@ -36,12 +57,28 @@ class SphericalPendulumSimulation():
 
         return np.array([d2_theta, d2_phi])
     
+
     def f(self, x, dt):
-        n = 100
+        n = 150
         x_new = x
+
         for i in range(n):
             x_new = x_new + self.state_first_deriv(x_new) * dt/n
+
+        # e_pot = -1 * self.g * self.l * np.cos(x_new[0])
+        # e_kin = 0.5 * (self.l ** 2) * (x_new[2]**2 + x_new[3]**2 * np.sin(x_new[0])**2)
+
+        # e_pot_tgt = np.abs(-e_kin)
+        # newtheta = np.arccos(e_pot_tgt / (-self.g * self.l))
+  
+        #print("Kin: {} Pot: {} Pot_tgt: {} Theta: {} nT: {}".format(e_kin, e_pot, e_pot_tgt, x_new[0], newtheta))
+        #x_new[0] = (newtheta + x_new[0]) / 2
+        # e_pot = -1 * self.g * self.l * np.cos(x[0])
+        # e_kin = 0.5 * (self.l ** 2) * (x[2]**2 + x[3]**2 * np.sin(x[0])**2)
+        # print("Corrected: Kin: {} Pot: {} Sum: {}".format(e_pot, e_kin, e_pot + e_kin))
+        
         return x_new
+
 
     def run(self):
         #calculate states
@@ -81,11 +118,17 @@ def main(config):
     else:
         print("No Configuration found!")
 
-if __name__ == "__main__":
+def runSim():
     if (len(sys.argv) == 2): 
         config = utils.read_from_csv(str(sys.argv[1])+'.csv')
     else:
         config = utils.read_from_csv('config.csv')
+
     main(config)
+
+
+if __name__ == "__main__":
+    runSim()
+
 
 

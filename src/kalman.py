@@ -39,7 +39,7 @@ def h(x):
     return y
 
 def f(x, dt):
-    n = 100
+    n = 150
     x_new = x
     for i in range(n):
         x_new = x_new + state_first_deriv(x_new) * dt/n
@@ -49,10 +49,10 @@ def f(x, dt):
 
 
 class PendulumUKF(): 
-    def __init__(self, x, positions, dt):
+    def __init__(self, x, positions, dt, stdx, stdy, stdz):
         self.sigmas = MerweScaledSigmaPoints(4, alpha=.1, beta=2, kappa=-1)
        
-        self.std_x, self.std_y, self.std_z = .4,.4,.4
+        self.std_x, self.std_y, self.std_z = stdx, stdy, stdz
         self.positions = positions
 
         self.ukf = UKF(dim_x=4, dim_z=3,fx=f, hx=h, dt=dt, points=self.sigmas)
@@ -63,11 +63,8 @@ class PendulumUKF():
 
     def run(self):
         uxs = []
-        for i,p in enumerate(self.positions):
+        for p in self.positions:
             self.ukf.predict()
-            #print(self.ukf.x)
-            #if (i < 40 or i > 600):
-                #print("updating", i)
             self.ukf.update(p)
             uxs.append(self.ukf.x.copy())
 
@@ -79,14 +76,19 @@ class PendulumUKF():
         ux_positions = np.array(ux_positions)
         return ux_positions
 
-if __name__ == "__main__":
+
+def runFilter(std_x, std_y, std_z):
     simulation = utils.read_from_csv('messy.csv')
     
     x, positions,ts = utils.simulation_data_to_array(simulation) 
-    kalman = PendulumUKF(x, positions, 0.01)
+    kalman = PendulumUKF(x, positions, 0.01, std_x, std_y, std_z)
     kalman_positions = np.array(kalman.run())
     utils.write_to_csv(x,kalman_positions,ts, "kalman")
     print('STD UKF', np.std(kalman_positions - positions))
 
+
+
+if __name__ == "__main__":
+    runFilter()
 
 
