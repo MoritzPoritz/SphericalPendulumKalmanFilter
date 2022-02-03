@@ -11,9 +11,8 @@ import sys
 
 
 def plot_pendulum(path):
-    print(type(path))
+    print(path)
     if (type(path) == str): 
-        print("Single file")
         simulation = utils.read_from_csv(path+'.csv')
 
         if simulation.empty is False:
@@ -74,9 +73,9 @@ def plot_pendulum(path):
 
 
 if __name__ == "__main__":
-    print(len(sys.argv))
     if (len(sys.argv) == 2):
         plot_pendulum(str(sys.argv[1]))
+        print("Single file")
     elif (len(sys.argv) == 4): 
         datapath1 = sys.argv[1]
         datapath2 = sys.argv[2]

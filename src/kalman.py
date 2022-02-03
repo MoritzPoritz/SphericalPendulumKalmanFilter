@@ -38,7 +38,7 @@ def h(x):
     y = utils.polar_to_kartesian(l, x[0], x[1]) 
     return y
 
-def f(x, dt):
+def f(x, u, dt):
     n = 150
     x_new = x
     for i in range(n):

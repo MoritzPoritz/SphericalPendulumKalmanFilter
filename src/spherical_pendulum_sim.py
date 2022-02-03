@@ -16,9 +16,24 @@ class SphericalPendulumSimulation():
         self.g = 9.81
         self.l = pendulum_length
         self.positions = []
+        self.imu_speed_data = []
+        self.imu_acceleration_data = [[0,0,0]]
         self.Ts = [0]
         self.N = N
         self.dt = dt
+
+    def imu_speed(self, x):
+        dx = self.l *  np.cos(x[0]) * np.cos(x[1]) * x[2] - self.l * np.sin(x[0]) * np.sin(x[1]) * x[3]
+        dy = self.l *  np.cos(x[0]) * np.sin(x[1]) * x[2] - self.l * np.sin(x[0]) * np.cos(x[1]) * x[3]
+        dz = self.l * np.sin(x[0]) * x[2]
+        return [dx,dy,dz]
+        #p = position pb = position_before
+    def imu_acceleration(self, dp, dpb, p, pb):
+        ddx = (dp[0] - dpb[0]) / p[0] - pb[0]
+        ddy = (dp[1] - dpb[1]) / p[1] - pb[1]
+        ddz = (dp[2] - dpb[2]) / p[2] - pb[2]
+        
+        return [ddx, ddy, ddz]
 
     def state_first_deriv(self, x):
         dq = x[2:]
@@ -48,6 +63,8 @@ class SphericalPendulumSimulation():
 
     def second_deriv_theta_phi(self, x):
         theta, phi, d_theta, d_phi = x
+        if (theta == 0): 
+            print('theta is 0')
         c, s, t = np.cos(theta), np.sin(theta), np.tan(theta)
 
         d2_theta = (d_phi**2 * c - self.g / self.l) * s
@@ -57,25 +74,13 @@ class SphericalPendulumSimulation():
 
         return np.array([d2_theta, d2_phi])
     
-
+    # state is defined as x = [theta phi dtheta dphi]
     def f(self, x, dt):
-        n = 150
+        n = 100
         x_new = x
 
         for i in range(n):
             x_new = x_new + self.state_first_deriv(x_new) * dt/n
-
-        # e_pot = -1 * self.g * self.l * np.cos(x_new[0])
-        # e_kin = 0.5 * (self.l ** 2) * (x_new[2]**2 + x_new[3]**2 * np.sin(x_new[0])**2)
-
-        # e_pot_tgt = np.abs(-e_kin)
-        # newtheta = np.arccos(e_pot_tgt / (-self.g * self.l))
-  
-        #print("Kin: {} Pot: {} Pot_tgt: {} Theta: {} nT: {}".format(e_kin, e_pot, e_pot_tgt, x_new[0], newtheta))
-        #x_new[0] = (newtheta + x_new[0]) / 2
-        # e_pot = -1 * self.g * self.l * np.cos(x[0])
-        # e_kin = 0.5 * (self.l ** 2) * (x[2]**2 + x[3]**2 * np.sin(x[0])**2)
-        # print("Corrected: Kin: {} Pot: {} Sum: {}".format(e_pot, e_kin, e_pot + e_kin))
         
         return x_new
 
@@ -86,15 +91,17 @@ class SphericalPendulumSimulation():
             self.x.append(self.f(self.x[i],self.dt))
             self.Ts.append(i*self.dt)
         #calculate positions
-        for state in self.x:
+        for i,state in enumerate(self.x):
+            self.imu_speed_data.append(self.imu_speed(self.x[i]))
             self.positions.append(utils.polar_to_kartesian(self.l, state[0], state[1]))
-
-
+            if(i > 0):
+                self.imu_acceleration_data.append(self.imu_acceleration(self.imu_speed_data[i], self.imu_speed_data[i-1], self.positions[i], self.positions[i-1]))
+            
     def return_sim_values(self):
         return [self.x, self.positions, self.Ts]
     
     def write_sim_data(self):
-        utils.write_to_csv(self.x, self.positions, self.Ts,"simulation")
+        utils.write_to_csv(self.x, self.positions, self.imu_acceleration_data, self.Ts,"simulation")
 
 
 
@@ -122,7 +129,7 @@ def runSim():
     if (len(sys.argv) == 2): 
         config = utils.read_from_csv(str(sys.argv[1])+'.csv')
     else:
-        config = utils.read_from_csv('config.csv')
+        config = utils.read_from_csv('config_flower.csv')
 
     main(config)
 
