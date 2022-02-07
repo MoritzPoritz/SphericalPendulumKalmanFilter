@@ -10,12 +10,11 @@ def polar_to_kartesian(r, theta, phi):
     return [x,y,z]
 
 
-def write_to_csv(states, pos, imus, Ts, name):
+def write_to_csv(states, pos, Ts, name):
     pos = np.array(pos)
     Ts = np.array(Ts)
     states = np.array(states)
-    imus = np.array(imus)
-    print(pos.shape, Ts.shape, states.shape, imus.shape)
+    print(states.shape, pos.shape, Ts.shape)
     df = pd.DataFrame({
         'theta':states[:,0],
         'phi': states[:,1],
@@ -24,9 +23,6 @@ def write_to_csv(states, pos, imus, Ts, name):
         'position_x': pos[:,0],
         'position_y': pos[:,1],
         'position_z': pos[:,2],
-        'imu_acc_x': imus[:,0],
-        'imu_acc_x': imus[:,1], 
-        'imu_acc_x': imus[:,2],
         'timestep': Ts
         })
     df.to_csv('data/'+name+'.csv', sep=',')

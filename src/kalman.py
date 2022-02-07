@@ -38,7 +38,7 @@ def h(x):
     y = utils.polar_to_kartesian(l, x[0], x[1]) 
     return y
 
-def f(x, u, dt):
+def f(x, dt):
     n = 150
     x_new = x
     for i in range(n):
@@ -49,12 +49,13 @@ def f(x, u, dt):
 
 
 class PendulumUKF(): 
-    def __init__(self, x, positions, dt, stdx, stdy, stdz):
+    def __init__(self, x, positions, dt, stdx, stdy, stdz, occStart, occEnd):
         self.sigmas = MerweScaledSigmaPoints(4, alpha=.1, beta=2, kappa=-1)
        
         self.std_x, self.std_y, self.std_z = stdx, stdy, stdz
         self.positions = positions
-
+        self.occStart = occStart
+        self.occEnd = occEnd
         self.ukf = UKF(dim_x=4, dim_z=3,fx=f, hx=h, dt=dt, points=self.sigmas)
         self.ukf.x = x[0]
         self.ukf.R = np.diag([self.std_x**2, self.std_y**2, self.std_z**2])
@@ -63,9 +64,10 @@ class PendulumUKF():
 
     def run(self):
         uxs = []
-        for p in self.positions:
+        for idx, p in enumerate(self.positions):
             self.ukf.predict()
-            self.ukf.update(p)
+            if idx < self.occStart or idx > self.occEnd:
+                self.ukf.update(p)
             uxs.append(self.ukf.x.copy())
 
         uxs = np.array(uxs)
@@ -74,17 +76,17 @@ class PendulumUKF():
             ux_positions.append(utils.polar_to_kartesian(l, ux[0], ux[1]))
 
         ux_positions = np.array(ux_positions)
+        print(self.ukf.P)
         return ux_positions
 
 
-def runFilter(std_x, std_y, std_z):
+def runFilter(std_x, std_y, std_z, occStart, occEnd):
     simulation = utils.read_from_csv('messy.csv')
     
     x, positions,ts = utils.simulation_data_to_array(simulation) 
-    kalman = PendulumUKF(x, positions, 0.01, std_x, std_y, std_z)
+    kalman = PendulumUKF(x, positions, 0.01, std_x, std_y, std_z, occStart, occEnd)
     kalman_positions = np.array(kalman.run())
     utils.write_to_csv(x,kalman_positions,ts, "kalman")
-    print('STD UKF', np.std(kalman_positions - positions))
 
 
 
