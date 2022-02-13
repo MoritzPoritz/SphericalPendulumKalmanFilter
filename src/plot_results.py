@@ -61,7 +61,7 @@ def plot_results(path, occStart, occEnd, kalman_variances):
         for i in range(len(meaned_filter_std)): 
             if (meaned_filter_std_minus[i] < meaned_real_std[i] < meaned_filter_std[i]): 
                 in_std_count+=1
-        print("STD of values is in range: " + str(in_std_count/len(meaned_filter_std)*100) + "of the time")        
+        print("STD of values is in range: " + str(in_std_count/len(meaned_filter_std)*100) + " of the time")        
         # Hier: Anteil der Samples, bei denen das Reale Rauschen in den Grenzen des Filter liegt (vgl. real state error < kalman state error)
 
     
@@ -124,7 +124,7 @@ def plot_results(path, occStart, occEnd, kalman_variances):
 
         ax.plot(k_position_x[0:occStart], k_position_y[0:occStart], k_position_z[0:occStart], 
             color='blue', linewidth=0.6, alpha=0.6, label=path[1] + "with Data")
-
+        print(occStart, occEnd)
         ax.plot(k_position_x[occStart:occEnd], k_position_y[occStart:occEnd], k_position_z[occStart:occEnd],
             color='red', linewidth=0.9, label=path[1] + "Prediction only")
 

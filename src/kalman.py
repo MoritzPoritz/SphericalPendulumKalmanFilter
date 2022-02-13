@@ -67,15 +67,18 @@ class PendulumUKF():
         uxs = []
         ps = []
         for idx, p in enumerate(self.positions):
-            self.ukf.predict()
-            if idx < self.occStart or idx > self.occEnd:
-                self.ukf.update(p)
-            uxs.append(self.ukf.x.copy())
-            ps.append(np.diag(self.ukf.P))
-
+            try:
+                self.ukf.predict()
+                
+                if idx < self.occStart or idx > self.occEnd:
+                    self.ukf.update(p)
+                uxs.append(self.ukf.x.copy())
+                ps.append(np.diag(self.ukf.P))
+            except: 
+                uxs.append([0,0,0,0])
+                ps.append([0,0,0,0])
         uxs = np.array(uxs)
         ps = np.array(ps)
-        print("VAR Shape",ps.shape)
         ux_positions = []
         for ux in uxs:
             ux_positions.append(utils.polar_to_kartesian(l, ux[0], ux[1]))
