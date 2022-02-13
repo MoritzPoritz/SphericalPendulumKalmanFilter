@@ -8,7 +8,7 @@ from evaluate_filter import evaluate_filter
 import utils
 import numpy as np
 
-iteration_count = 1
+iteration_count = 10
 # Standardabweichung des auf die Simdaten aufgebrachten Rauschens
 std_x, std_y, std_z = 0.05, 0.05, 0.05
 
@@ -38,6 +38,6 @@ def run_project(shall_plot, occStart, occEnd):
 simulation_results = []
 for i in range(iteration_count): 
     mse, mse_db, error_in_place = run_project(False, occStart, occStart + occStep*i)
-    simulation_results.append([i, mse, mse_db, error_in_place, occStart, occStart + occStep*i])
+    simulation_results.append([i, mse, mse_db, error_in_place, occStart, occStart + occStep*i,(occStart + occStep*i) - occStart])
 simulation_results = np.array(simulation_results)
-utils.write_evaluation_to_csv(simulation_results[:,0], simulation_results[:,1], simulation_results[:,2], simulation_results[:,3], simulation_results[:,4], simulation_results[:,5])
+utils.write_evaluation_to_csv(simulation_results[:,0], simulation_results[:,1], simulation_results[:,2], simulation_results[:,3], simulation_results[:,4], simulation_results[:,5], simulation_results[:,6])

@@ -2,14 +2,15 @@ import numpy as np
 import pandas as pd
 from datetime import date, datetime
 
-def write_evaluation_to_csv(index, mse, mse_db, error_in_place, occ_start, occ_end): 
+def write_evaluation_to_csv(index, mse, mse_db, error_in_place, occ_start, occ_end,occ_dur): 
     df = pd.DataFrame({
         'index': index, 
         'Mean Squared Error':mse, 
         'Mean Squared Error dB':mse_db, 
         'Error in Filter Std':error_in_place,
         'Occlusion Start': occ_start, 
-        'Occlusiion End': occ_end
+        'Occlusion End': occ_end,
+        'Occlusion Duration': occ_dur
         })
     df.to_csv('data/Evaluation_'+str(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))+'.csv', sep=',')
 
