@@ -9,7 +9,7 @@ def mess_sim_data(std_x, std_y, std_z):
     states, positions, ts = utils.simulation_data_to_array(sim_data)
     positions = [[p[0]+std_x*np.random.randn(), p[1]+std_y*np.random.randn(), p[2]+std_z*np.random.randn()] for p in positions]
 
-    utils.write_to_csv(states, positions, ts, "messy")
+    utils.write_to_csv(states, positions, ts, "messy",[])
 
 
 

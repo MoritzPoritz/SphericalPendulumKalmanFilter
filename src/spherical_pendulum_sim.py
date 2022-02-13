@@ -63,18 +63,6 @@ class SphericalPendulumSimulation():
         for i in range(n):
             x_new = x_new + self.state_first_deriv(x_new) * dt/n
 
-        # e_pot = -1 * self.g * self.l * np.cos(x_new[0])
-        #e_kin = 0.5 * (self.l ** 2) * (x_new[2]**2 + x_new[3]**2 * np.sin(x_new[0])**2)
-
-        # e_pot_tgt = np.abs(-e_kin)
-        # newtheta = np.arccos(e_pot_tgt / (-self.g * self.l))
-  
-        #print("Theta: {} Phi: {} DTheta: {} DPhi: {} EKin: {}".format( x_new[0],  x_new[1],  x_new[2], x_new[3], e_kin))
-        #x_new[0] = (newtheta + x_new[0]) / 2
-        # e_pot = -1 * self.g * self.l * np.cos(x[0])
-        # e_kin = 0.5 * (self.l ** 2) * (x[2]**2 + x[3]**2 * np.sin(x[0])**2)
-        # print("Corrected: Kin: {} Pot: {} Sum: {}".format(e_pot, e_kin, e_pot + e_kin))
-
         return x_new
 
 
@@ -92,7 +80,7 @@ class SphericalPendulumSimulation():
         return [self.x, self.positions, self.Ts]
     
     def write_sim_data(self):
-        utils.write_to_csv(self.x, self.positions, self.Ts,"simulation")
+        utils.write_to_csv(self.x, self.positions, self.Ts,"simulation", [])
 
 
 

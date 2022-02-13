@@ -1,7 +1,17 @@
 import numpy as np
 import pandas as pd
-import pathlib
+from datetime import date, datetime
 
+def write_evaluation_to_csv(index, mse, mse_db, error_in_place, occ_start, occ_end): 
+    df = pd.DataFrame({
+        'index': index, 
+        'Mean Squared Error':mse, 
+        'Mean Squared Error dB':mse_db, 
+        'Error in Filter Std':error_in_place,
+        'Occlusion Start': occ_start, 
+        'Occlusiion End': occ_end
+        })
+    df.to_csv('data/Evaluation_'+str(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))+'.csv', sep=',')
 
 def polar_to_kartesian(r, theta, phi):
     x = r * np.sin(theta) * np.cos(phi)
@@ -10,21 +20,44 @@ def polar_to_kartesian(r, theta, phi):
     return [x,y,z]
 
 
-def write_to_csv(states, pos, Ts, name):
-    pos = np.array(pos)
-    Ts = np.array(Ts)
-    states = np.array(states)
-    print(states.shape, pos.shape, Ts.shape)
-    df = pd.DataFrame({
-        'theta':states[:,0],
-        'phi': states[:,1],
-        'dtheta': states[:,2],
-        'dphi': states[:,3],
-        'position_x': pos[:,0],
-        'position_y': pos[:,1],
-        'position_z': pos[:,2],
-        'timestep': Ts
-        })
+def write_to_csv(states, pos, Ts, name, vars):
+    
+    if (len(vars) >0): 
+        print("HALLO")
+        pos = np.array(pos)
+        Ts = np.array(Ts)
+        states = np.array(states)
+        vars = np.array(vars)
+        print(states.shape, pos.shape, vars.shape,Ts.shape)
+        df = pd.DataFrame({
+            'theta':states[:,0],
+            'phi': states[:,1],
+            'dtheta': states[:,2],
+            'dphi': states[:,3],
+            'position_x': pos[:,0],
+            'position_y': pos[:,1],
+            'position_z': pos[:,2],
+            'var_theta': vars[:,0],
+            'var_phi': vars[:,1],
+            'var_dtheta': vars[:,2],
+            'var_dphi': vars[:,3], 
+            'timestep': Ts
+            })
+    else: 
+        pos = np.array(pos)
+        Ts = np.array(Ts)
+        states = np.array(states)
+        print(states.shape, pos.shape, Ts.shape)
+        df = pd.DataFrame({
+            'theta':states[:,0],
+            'phi': states[:,1],
+            'dtheta': states[:,2],
+            'dphi': states[:,3],
+            'position_x': pos[:,0],
+            'position_y': pos[:,1],
+            'position_z': pos[:,2],
+            'timestep': Ts
+            })
     df.to_csv('data/'+name+'.csv', sep=',')
 
 

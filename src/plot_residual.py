@@ -11,7 +11,7 @@ import sys
 
 
 def plot_residual(path):
-    data1 = utils.read_from_csv(path[0]+'.csv')
+    data1 = utils.read_from_csv(path[0]+'.csv') # 
     data2 = utils.read_from_csv(path[1]+'.csv')
     if data1.empty is False and data2.empty is False:
         rx = data1["position_x"] - data2["position_x"]

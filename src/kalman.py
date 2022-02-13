@@ -9,6 +9,7 @@ import sympy as sp
 import math
 import utils
 import matplotlib.pyplot as plt
+import sys
 
 DEG_TO_RAD = math.pi/180
 RAD_TO_DEG = 180/math.pi
@@ -61,23 +62,28 @@ class PendulumUKF():
         self.ukf.R = np.diag([self.std_x**2, self.std_y**2, self.std_z**2])
         self.ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2,dt=dt, var=.02)
         self.ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2,dt=dt, var=.02)
-
+        self.variances = []
     def run(self):
         uxs = []
+        ps = []
         for idx, p in enumerate(self.positions):
             self.ukf.predict()
             if idx < self.occStart or idx > self.occEnd:
                 self.ukf.update(p)
             uxs.append(self.ukf.x.copy())
+            ps.append(np.diag(self.ukf.P))
 
         uxs = np.array(uxs)
+        ps = np.array(ps)
+        print("VAR Shape",ps.shape)
         ux_positions = []
         for ux in uxs:
             ux_positions.append(utils.polar_to_kartesian(l, ux[0], ux[1]))
 
         ux_positions = np.array(ux_positions)
-        print(self.ukf.P)
-        return ux_positions
+        self.variances = np.diagonal(self.ukf.P)
+        
+        return ux_positions, uxs, ps
 
 
 def runFilter(std_x, std_y, std_z, occStart, occEnd):
@@ -85,12 +91,12 @@ def runFilter(std_x, std_y, std_z, occStart, occEnd):
     
     x, positions,ts = utils.simulation_data_to_array(simulation) 
     kalman = PendulumUKF(x, positions, 0.01, std_x, std_y, std_z, occStart, occEnd)
-    kalman_positions = np.array(kalman.run())
-    utils.write_to_csv(x,kalman_positions,ts, "kalman")
-
+    kalman_positions,kalman_states, vars = kalman.run()
+    utils.write_to_csv(kalman_states,kalman_positions,ts, "kalman", vars)
+    return kalman
 
 
 if __name__ == "__main__":
-    runFilter()
+    runFilter(0.05, 0.05, 0.05, 0,0)
 
 
