@@ -22,7 +22,6 @@ def state_first_deriv(x):
     
     return np.concatenate([dq, dq2])
 
-
 def second_deriv_theta_phi(x):
     theta, phi, d_theta, d_phi = x
     c, s, t = np.cos(theta), np.sin(theta), np.tan(theta)
@@ -59,9 +58,10 @@ class PendulumUKF():
         self.occEnd = occEnd
         self.ukf = UKF(dim_x=4, dim_z=3,fx=f, hx=h, dt=dt, points=self.sigmas)
         self.ukf.x = x[0]
+        
         self.ukf.R = np.diag([self.std_x**2, self.std_y**2, self.std_z**2])
-        self.ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2,dt=dt, var=.02)
-        self.ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2,dt=dt, var=.02)
+        self.ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2,dt=dt, var=.2)
+        self.ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2,dt=dt, var=.2)
         self.variances = []
     def run(self):
         uxs = []
@@ -90,10 +90,10 @@ class PendulumUKF():
 
 
 def runFilter(std_x, std_y, std_z, occStart, occEnd):
-    simulation = utils.read_from_csv('messy.csv')
+    simulation = utils.read_from_csv('CleanedOptitrack.csv')
     
     x, positions,ts = utils.simulation_data_to_array(simulation) 
-    kalman = PendulumUKF(x, positions, 0.01, std_x, std_y, std_z, occStart, occEnd)
+    kalman = PendulumUKF(x, positions, 1/120, std_x, std_y, std_z, occStart, occEnd)
     kalman_positions,kalman_states, vars = kalman.run()
     utils.write_to_csv(kalman_states,kalman_positions,ts, "kalman", vars)
     return kalman

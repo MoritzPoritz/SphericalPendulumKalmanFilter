@@ -8,7 +8,7 @@ from evaluate_filter import evaluate_filter
 import utils
 import numpy as np
 
-iteration_count = 40
+iteration_count = 1
 # Standardabweichung des auf die Simdaten aufgebrachten Rauschens
 std_x, std_y, std_z = 0.05, 0.05, 0.05
 
@@ -16,18 +16,16 @@ std_x, std_y, std_z = 0.05, 0.05, 0.05
 # An den Filter übergebene Standardabweichung. Sollte im Realfall die Sensorstandardabweichung sein
 kstd_x, kstd_y, kstd_z = 0.05, 0.05, 0.05
 
-occStart = 100
-occEnd = 600
-occStep = 10
-
-
+occStart = 0
+occEnd = 0
+occStep = 0
 
 def run_project(shall_plot, occStart, occEnd):
 
     #print("Starting Sim!")
     #spherical_pendulum_sim.runSim()
     #print("Generating Noisy Sensor Data")
-    mess_sim_data.mess_sim_data(std_x, std_y, std_z)
+    #mess_sim_data.mess_sim_data(std_x, std_y, std_z)
     #print("Filtering Data")
     kalman_filter = kalman.runFilter(kstd_x, kstd_y, kstd_z, occStart, occEnd)
     #print("Filtered. Plotting:")

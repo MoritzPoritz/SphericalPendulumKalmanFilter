@@ -19,7 +19,6 @@ def plot_results(path, occStart, occEnd, kalman_variances):
     fig = plt.figure(figsize=plt.figaspect(1.5))
     fig.suptitle('A tale of 2 subplots')
 
-
     data1 = utils.read_from_csv(path[0]+'.csv') # grounn truth
     data2 = utils.read_from_csv(path[1]+'.csv') # kalman
     if data1.empty is False and data2.empty is False:
@@ -28,7 +27,6 @@ def plot_results(path, occStart, occEnd, kalman_variances):
         var_dtheta = data2['var_dtheta']
         var_dphi = data2['var_dphi']
         kalman_mse = (var_theta + var_phi + var_dtheta + var_dphi).mean()
-
 
         meaned_filter_std = []
         
