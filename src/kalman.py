@@ -14,7 +14,7 @@ import sys
 DEG_TO_RAD = math.pi/180
 RAD_TO_DEG = 180/math.pi
 gravitation = 9.81
-l = 0.5
+l = 0.643974
 
 def state_first_deriv(x):
     dq = x[2:]
@@ -39,7 +39,7 @@ def h(x):
     return y
 
 def f(x, dt):
-    n = 150
+    n = 250
     x_new = x
     for i in range(n):
         x_new = x_new + state_first_deriv(x_new) * dt/n
@@ -60,8 +60,8 @@ class PendulumUKF():
         self.ukf.x = x[0]
         
         self.ukf.R = np.diag([self.std_x**2, self.std_y**2, self.std_z**2])
-        self.ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2,dt=dt, var=.2)
-        self.ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2,dt=dt, var=.2)
+        self.ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2,dt=dt, var=.02)
+        self.ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2,dt=dt, var=.02)
         self.variances = []
     def run(self):
         uxs = []
@@ -69,7 +69,7 @@ class PendulumUKF():
         for idx, p in enumerate(self.positions):
             try:
                 self.ukf.predict()
-                
+                #print(idx)
                 if idx < self.occStart or idx > self.occEnd:
                     self.ukf.update(p)
                 uxs.append(self.ukf.x.copy())
@@ -98,8 +98,7 @@ def runFilter(std_x, std_y, std_z, occStart, occEnd):
     utils.write_to_csv(kalman_states,kalman_positions,ts, "kalman", vars)
     return kalman
 
-
 if __name__ == "__main__":
-    runFilter(0.05, 0.05, 0.05, 0,0)
+    runFilter(0.002, 0.002, 0.002, 0,0)
 
 

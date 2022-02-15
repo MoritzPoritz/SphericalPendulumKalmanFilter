@@ -14,7 +14,7 @@ import sys
 def f(t):
     return np.cos(2*np.pi*t) * np.exp(-t)
 
-def plot_results(path, occStart, occEnd, kalman_variances):
+def plot_results(path, occStart, occEnd):
 # Set up a figure twice as tall as it is wide
     fig = plt.figure(figsize=plt.figaspect(1.5))
     fig.suptitle('A tale of 2 subplots')
@@ -29,28 +29,28 @@ def plot_results(path, occStart, occEnd, kalman_variances):
         kalman_mse = (var_theta + var_phi + var_dtheta + var_dphi).mean()
 
         meaned_filter_std = []
-        
         #This only works for the measurement data filter gives variance for the state x = [theta, phi, dtheta, dphi]
         rx = data1["position_x"] - data2["position_x"]
         ry = data1["position_y"] - data2["position_y"]
         rz = data1["position_z"] - data2["position_z"]
         mse = (rx**2 + ry**2 + rz**2).mean()
         mse_db = np.log10(mse)*10
+     
+        theta = []
+        phi = []
         
-        rtheta = data1["theta"] - data2["theta"]
-        rphi = data1["phi"] - data2["phi"]
-        rdtheta = data1["dtheta"] - data2["dtheta"]
-        rdphi = data1["dphi"] - data2["dphi"]
-        # This is not necessary as the optitrack gives us also cartesian coordinates
-        #state_mse = (rtheta**2 + rphi**2 +rdtheta**2 + rdphi**2).mean()
-        #state_mse_db = np.log10(state_mse)*10
         meaned_real_std = []
-        for i in range(len(data1['timestep'])): 
+        for i in range(len(data2['timestep'])): 
             meaned_filter_std.append((np.sqrt(var_theta[i]) + np.sqrt(var_phi[i]) + np.sqrt(var_dtheta[i]) + np.sqrt(var_dphi[i]))/4)
             meaned_real_std.append(rx[i] + ry[i] + rz[i])
+            t,p = utils.cartesian_to_polar(data1["position_x"][i], data1['position_y'][i], data1['position_z'][i])
+            theta.append(t)
+            phi.append(p)
+        
+        theta = np.array(theta)
+        phi = np.array(phi)
         
         meaned_filter_std = np.array(meaned_filter_std)
-        print(meaned_filter_std.shape)
 
         meaned_filter_std_minus = meaned_filter_std*-1
         
@@ -70,20 +70,26 @@ def plot_results(path, occStart, occEnd, kalman_variances):
    
         
         ax = fig.add_subplot(2, 1, 2)
-        ax.plot(meaned_filter_std, color="orange", label="Std")
-        ax.plot(meaned_filter_std_minus, color="orange",label="Std")
+        ax.plot(data2['timestep'],meaned_filter_std, color="orange", label="Std")
+        ax.plot(data2['timestep'],meaned_filter_std_minus, color="orange",label="Std")
         
-        ax.plot(rx + ry + rz, label="Sum of Errors")
+        ax.plot(data2['timestep'],(rx + ry + rz)[0:len(data2['timestep'])], label="Sum of Errors")
         #ax.plot((rx + ry + rz)/3, label="Sum of Errors")
         
-        #ax.plot(var_theta, label="Variance Theta")
-        #ax.plot(var_phi, label="Variance Phi")
-        #ax.plot(var_dtheta, label="Variance DTheta")
-        #ax.plot(var_dphi, label="Variance DPhi")
+        ax2 = ax.twinx()
+        ax2.set_label("Theta")
+        ax2.plot(data1['timestep'][0:len(data2['timestep'])],theta, color="red", label="theta")
+        ax2.plot(data1['timestep'][0:len(data2['timestep'])],phi, color="purple", label="phi")
+        ax2.legend()
+        ax2.tick_params(axis="y")
+        
+ 
+
         ax.legend()
         ax.set_title("Residual Plot (Error %.2fdB)" %mse_db)
         ax.set_xlabel("Time [s]")
         ax.set_ylabel("Residual [m]")
+        ax.set_ylim(-.25,.25)
         ax.grid(True)
 
 
@@ -118,7 +124,7 @@ def plot_results(path, occStart, occEnd, kalman_variances):
         ax.text(s_position_x[0], s_position_y[0], s_position_z[0], "P0", color="black", fontsize=8)
         ax.text(k_position_x[occStart], k_position_y[occStart], k_position_z[occStart], "OccStart", color="black", fontsize=8)
 
-        ax.plot(s_position_x, s_position_y, s_position_z, color='green', linewidth=1, alpha=0.8, label=path[0])
+        ax.plot(s_position_x[0:len(k_position_x)-1], s_position_y[0:len(k_position_y)-1], s_position_z[0:len(k_position_z)-1], color='green', linewidth=1, alpha=0.8, label=path[0])
 
         ax.plot(k_position_x[0:occStart], k_position_y[0:occStart], k_position_z[0:occStart], 
             color='blue', linewidth=0.6, alpha=0.6, label=path[1] + "with Data")
