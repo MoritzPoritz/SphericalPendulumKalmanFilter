@@ -23,14 +23,17 @@ def state_first_deriv(x):
     return np.concatenate([dq, dq2])
 
 def second_deriv_theta_phi(x):
-    theta, phi, d_theta, d_phi = x
-    c, s, t = np.cos(theta), np.sin(theta), np.tan(theta)
+    try:
+        theta, phi, d_theta, d_phi = x
+        c, s, t = np.cos(theta), np.sin(theta), np.tan(theta)
 
-    d2_theta = (d_phi**2 * c - gravitation / l) * s
-    d2_phi = -2 * d_theta * d_phi / t
-    if (t == 0):
-        print ('t is 0')
-
+        d2_theta = (d_phi**2 * c - gravitation / l) * s
+        d2_phi = -2 * d_theta * d_phi / t
+        print(type(t))
+        if (t == 0):
+            print ('t is 0')
+    except: 
+        pass
     return np.array([d2_theta, d2_phi])
     
 
@@ -89,8 +92,8 @@ class PendulumUKF():
         return ux_positions, uxs, ps
 
 
-def runFilter(std_x, std_y, std_z, occStart, occEnd):
-    simulation = utils.read_from_csv('CleanedOptitrack.csv')
+def runFilter(std_x, std_y, std_z, occStart, occEnd, csv_name):
+    simulation = utils.read_from_csv(csv_name + '.csv')
     
     x, positions,ts = utils.simulation_data_to_array(simulation) 
     kalman = PendulumUKF(x, positions, 1/120, std_x, std_y, std_z, occStart, occEnd)
@@ -99,6 +102,14 @@ def runFilter(std_x, std_y, std_z, occStart, occEnd):
     return kalman
 
 if __name__ == "__main__":
-    runFilter(0.002, 0.002, 0.002, 0,0)
+    if (len(sys.argv) == 7): 
+        dataset = sys.argv[1]
+        pendulum_length = sys.argv[2]
+        std = sys.argv[3]
+        occ_start = sys.argv[4]
+        occ_end = sys.argv[5]
+        runFilter(float(std), float(std), float(std), float(occ_start), float(occ_end), float(occ_end), dataset )
+    else:
+        runFilter(0.002, 0.002, 0.002, 0,0,"CleanedOptitrack")
 
 
