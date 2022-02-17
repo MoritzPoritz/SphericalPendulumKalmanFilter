@@ -217,8 +217,8 @@ def plot_tracking_and_kalman(tracking, kalman, occStart, occEnd):
         # Additionally plot angles theta and phi
         ax2 = ax.twinx()
         ax2.set_label("Theta")
-        #ax2.plot(kalman['timestep'],theta, color="red", label="theta")
-        #ax2.plot(kalman['timestep'],phi, color="purple", label="phi")
+        ax2.plot(kalman['timestep'],theta, color="red", label="theta")
+        ax2.plot(kalman['timestep'],phi, color="purple", label="phi")
         ax2.legend()
         ax2.tick_params(axis="y")
         

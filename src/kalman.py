@@ -23,17 +23,13 @@ def state_first_deriv(x):
     return np.concatenate([dq, dq2])
 
 def second_deriv_theta_phi(x):
-    try:
-        theta, phi, d_theta, d_phi = x
-        c, s, t = np.cos(theta), np.sin(theta), np.tan(theta)
-
-        d2_theta = (d_phi**2 * c - gravitation / l) * s
-        d2_phi = -2 * d_theta * d_phi / t
-        print(type(t))
-        if (t == 0):
-            print ('t is 0')
-    except: 
-        pass
+    theta, phi, d_theta, d_phi = x
+    c, s, t = np.cos(theta), np.sin(theta), np.tan(theta)
+    #print(x)
+    d2_theta = (d_phi**2 * c - gravitation / l) * s
+    d2_phi = -2 * d_theta * d_phi / t
+    if (t == 0):
+        print ('t is 0')
     return np.array([d2_theta, d2_phi])
     
 
@@ -42,10 +38,11 @@ def h(x):
     return y
 
 def f(x, dt):
-    n = 250
+    n = 1000
     x_new = x
     for i in range(n):
         x_new = x_new + state_first_deriv(x_new) * dt/n
+    
     return x_new
     #x_new = x + state_first_deriv(x) * dt
     #return x_new
@@ -60,24 +57,33 @@ class PendulumUKF():
         self.occStart = occStart
         self.occEnd = occEnd
         self.ukf = UKF(dim_x=4, dim_z=3,fx=f, hx=h, dt=dt, points=self.sigmas)
+        self.init_theta, self.init_phi = utils.cartesian_to_polar(self.positions[0][0], self.positions[0][1],self.positions[0][2])
+        #self.ukf.x = [self.init_theta, self.init_phi,0,0]
         self.ukf.x = x[0]
-        
         self.ukf.R = np.diag([self.std_x**2, self.std_y**2, self.std_z**2])
-        self.ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2,dt=dt, var=.02)
-        self.ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2,dt=dt, var=.02)
+        self.ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2,dt=dt, var=.2)
+        self.ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2,dt=dt, var=.2)
         self.variances = []
+
+    
     def run(self):
         uxs = []
         ps = []
         for idx, p in enumerate(self.positions):
+            if (idx % 100 == 0): 
+                print(idx)
+                print(self.ukf.x)
+
             try:
                 self.ukf.predict()
                 #print(idx)
                 if idx < self.occStart or idx > self.occEnd:
                     self.ukf.update(p)
                 uxs.append(self.ukf.x.copy())
+                #print("id: ", idx, "x: ", self.ukf.x)
                 ps.append(np.diag(self.ukf.P))
             except: 
+                print(self.ukf.x)
                 uxs.append([0,0,0,0])
                 ps.append([0,0,0,0])
         uxs = np.array(uxs)
@@ -98,7 +104,8 @@ def runFilter(std_x, std_y, std_z, occStart, occEnd, csv_name):
     x, positions,ts = utils.simulation_data_to_array(simulation) 
     kalman = PendulumUKF(x, positions, 1/120, std_x, std_y, std_z, occStart, occEnd)
     kalman_positions,kalman_states, vars = kalman.run()
-    utils.write_to_csv(kalman_states,kalman_positions,ts, "kalman", vars)
+    utils.write_to_csv(kalman_states,kalman_positions,ts, "kalman_new", vars)
+    
     return kalman
 
 if __name__ == "__main__":
