@@ -24,7 +24,7 @@ def evaluate_filter(ground_truth, kalman):
         var_phi = kalman_data['var_phi']
         var_dtheta = kalman_data['var_dtheta']
         var_dphi = kalman_data['var_dphi']
-        kalman_mse = (var_theta + var_phi + var_dtheta + var_dphi).mean()
+        meaned_variance = (var_theta + var_phi + var_dtheta + var_dphi).mean()
 
         meaned_real_std = []
         meaned_filter_std = []
@@ -33,8 +33,6 @@ def evaluate_filter(ground_truth, kalman):
             meaned_real_std.append(rx[i] + ry[i] + rz[i])
         
         meaned_filter_std = np.array(meaned_filter_std)
-        print(meaned_filter_std.shape)
-
         meaned_filter_std_minus = meaned_filter_std*-1
         
         in_std_count = 0
@@ -45,4 +43,4 @@ def evaluate_filter(ground_truth, kalman):
         error_in_place = in_std_count/len(meaned_filter_std)*100
         print("STD of values is in range: " + str(error_in_place) + " percent of the time")  
 
-        return mse, mse_db, error_in_place
+        return mse, mse_db, error_in_place, meaned_variance

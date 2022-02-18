@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from datetime import date, datetime
 
-def write_evaluation_to_csv(index, mse, mse_db, error_in_place, occ_start, occ_end,occ_dur): 
+def write_evaluation_to_csv(index, mse, mse_db, error_in_place, occ_start, occ_end,occ_dur, Q_var, meaned_kalman_var): 
     df = pd.DataFrame({
         'index': index, 
         'Mean Squared Error':mse, 
@@ -10,7 +10,9 @@ def write_evaluation_to_csv(index, mse, mse_db, error_in_place, occ_start, occ_e
         'Error in Filter Std':error_in_place,
         'Occlusion Start': occ_start, 
         'Occlusion End': occ_end,
-        'Occlusion Duration': occ_dur
+        'Occlusion Duration': occ_dur, 
+        'System Noise': Q_var, 
+        'Meaned Filter Variance': meaned_kalman_var
         })
     df.to_csv('data/Evaluation_'+str(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))+'.csv', sep=',')
 
@@ -63,7 +65,7 @@ def write_to_csv(states, pos, Ts, name, vars):
             'position_z': pos[:,2],
             'timestep': Ts
             })
-    df.to_csv('data/'+name+'.csv', sep=',')
+    df.to_csv('data/'+name+str(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))+'.csv', sep=',')
 
 
 def read_from_csv(path):

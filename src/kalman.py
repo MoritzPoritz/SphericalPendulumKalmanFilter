@@ -10,6 +10,7 @@ import math
 import utils
 import matplotlib.pyplot as plt
 import sys
+import time
 
 DEG_TO_RAD = math.pi/180
 RAD_TO_DEG = 180/math.pi
@@ -37,6 +38,7 @@ def h(x):
     y = utils.polar_to_kartesian(l, x[0], x[1]) 
     return y
 
+    
 def f(x, dt):
     n = 1000
     x_new = x
@@ -49,7 +51,7 @@ def f(x, dt):
 
 
 class PendulumUKF(): 
-    def __init__(self, x, positions, dt, stdx, stdy, stdz, occStart, occEnd):
+    def __init__(self, x, positions, dt, stdx, stdy, stdz, occStart, occEnd,Q_var):
         self.sigmas = MerweScaledSigmaPoints(4, alpha=.1, beta=2, kappa=-1)
        
         self.std_x, self.std_y, self.std_z = stdx, stdy, stdz
@@ -59,20 +61,21 @@ class PendulumUKF():
         self.ukf = UKF(dim_x=4, dim_z=3,fx=f, hx=h, dt=dt, points=self.sigmas)
         self.init_theta, self.init_phi = utils.cartesian_to_polar(self.positions[0][0], self.positions[0][1],self.positions[0][2])
         #self.ukf.x = [self.init_theta, self.init_phi,0,0]
+        #self.ukf.P *= 2
         self.ukf.x = x[0]
         self.ukf.R = np.diag([self.std_x**2, self.std_y**2, self.std_z**2])
-        self.ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2,dt=dt, var=.2)
-        self.ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2,dt=dt, var=.2)
-        self.variances = []
+        self.ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2,dt=dt, var=Q_var)
+        self.ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2,dt=dt, var=Q_var)
 
     
     def run(self):
         uxs = []
         ps = []
+        last_time = time.time()
         for idx, p in enumerate(self.positions):
             if (idx % 100 == 0): 
-                print(idx)
-                print(self.ukf.x)
+                print(idx, self.ukf.x)
+
 
             try:
                 self.ukf.predict()
@@ -83,9 +86,12 @@ class PendulumUKF():
                 #print("id: ", idx, "x: ", self.ukf.x)
                 ps.append(np.diag(self.ukf.P))
             except: 
-                print(self.ukf.x)
+                #print(self.ukf.x)
                 uxs.append([0,0,0,0])
                 ps.append([0,0,0,0])
+
+        print("Filtering took %.2f Minutes", str(time.time() - last_time))
+                
         uxs = np.array(uxs)
         ps = np.array(ps)
         ux_positions = []
@@ -93,16 +99,15 @@ class PendulumUKF():
             ux_positions.append(utils.polar_to_kartesian(l, ux[0], ux[1]))
 
         ux_positions = np.array(ux_positions)
-        self.variances = np.diagonal(self.ukf.P)
         
         return ux_positions, uxs, ps
 
 
-def runFilter(std_x, std_y, std_z, occStart, occEnd, csv_name):
+def runFilter(std_x, std_y, std_z, occStart, occEnd, csv_name,Q_var):
     simulation = utils.read_from_csv(csv_name + '.csv')
     
     x, positions,ts = utils.simulation_data_to_array(simulation) 
-    kalman = PendulumUKF(x, positions, 1/120, std_x, std_y, std_z, occStart, occEnd)
+    kalman = PendulumUKF(x, positions, 1/120, std_x, std_y, std_z, occStart, occEnd, Q_var)
     kalman_positions,kalman_states, vars = kalman.run()
     utils.write_to_csv(kalman_states,kalman_positions,ts, "kalman_new", vars)
     
@@ -115,7 +120,8 @@ if __name__ == "__main__":
         std = sys.argv[3]
         occ_start = sys.argv[4]
         occ_end = sys.argv[5]
-        runFilter(float(std), float(std), float(std), float(occ_start), float(occ_end), float(occ_end), dataset )
+        Q_var = sys.argv[6]
+        runFilter(float(std), float(std), float(std), float(occ_start), float(occ_end), dataset, float(Q_var))
     else:
         runFilter(0.002, 0.002, 0.002, 0,0,"CleanedOptitrack")
 
