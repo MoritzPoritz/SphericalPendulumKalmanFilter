@@ -11,6 +11,8 @@ import utils
 import matplotlib.pyplot as plt
 import sys
 import time
+from datetime import datetime
+
 
 DEG_TO_RAD = math.pi/180
 RAD_TO_DEG = 180/math.pi
@@ -40,7 +42,7 @@ def h(x):
 
     
 def f(x, dt):
-    n = 1000
+    n = 150
     x_new = x
     for i in range(n):
         x_new = x_new + state_first_deriv(x_new) * dt/n
@@ -52,7 +54,7 @@ def f(x, dt):
 
 class PendulumUKF(): 
     def __init__(self, x, positions, dt, stdx, stdy, stdz, occStart, occEnd,Q_var):
-        self.sigmas = MerweScaledSigmaPoints(4, alpha=.1, beta=2, kappa=-1)
+        self.sigmas = MerweScaledSigmaPoints(4, alpha=1, beta=2, kappa=-1)
        
         self.std_x, self.std_y, self.std_z = stdx, stdy, stdz
         self.positions = positions
@@ -109,11 +111,13 @@ def runFilter(std_x, std_y, std_z, occStart, occEnd, csv_name,Q_var):
     x, positions,ts = utils.simulation_data_to_array(simulation) 
     kalman = PendulumUKF(x, positions, 1/120, std_x, std_y, std_z, occStart, occEnd, Q_var)
     kalman_positions,kalman_states, vars = kalman.run()
-    utils.write_to_csv(kalman_states,kalman_positions,ts, "kalman_new", vars)
+    filename = "kalman_new"+str(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))
+    utils.write_to_csv(kalman_states,kalman_positions,ts, filename, vars)
     
-    return kalman
+    return kalman, filename
 
 if __name__ == "__main__":
+    # Good Datasets are: CleanedOptitrack_1_slightly_shorter, CleanedOptitrack_3_perfect_flower
     if (len(sys.argv) == 7): 
         dataset = sys.argv[1]
         pendulum_length = sys.argv[2]

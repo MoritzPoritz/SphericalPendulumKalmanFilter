@@ -14,15 +14,15 @@ std_x, std_y, std_z = 0.05, 0.05, 0.05
 # An den Filter übergebene Standardabweichung. Sollte im Realfall die Sensorstandardabweichung sein
 kstd_x, kstd_y, kstd_z = 0.02, 0.02, 0.02
 
-occStart = 100
-occEnd = 300
-occStep = 30
+occStart = 1000
+occEnd = 10000
+occStep = 500
 
 iteration_count = int((occEnd - occStart) / occStep) 
 
 
-Q_var = 0.02
-csv_name = "CleanedOptitrack_Shorter"
+Q_var = 0.5
+csv_name = "CleanedOptitrack_3_perfect_flower"
 
 def run_project(shall_plot, occStart, occEnd, csv_name, Q_var):
 
@@ -31,11 +31,11 @@ def run_project(shall_plot, occStart, occEnd, csv_name, Q_var):
     #print("Generating Noisy Sensor Data")
     #mess_sim_data.mess_sim_data(std_x, std_y, std_z)
     #print("Filtering Data")
-    kalman_filter = kalman.runFilter(kstd_x, kstd_y, kstd_z, occStart, occEnd, csv_name, Q_var)
+    kalman_filter, filename = kalman.runFilter(kstd_x, kstd_y, kstd_z, occStart, occEnd, csv_name, Q_var)
     #print("Filtered. Plotting:")
     if (shall_plot):
         results = plot_results.plot_results(["simulation", "kalman", "messy"], occStart, occEnd, kalman_filter.variances)
-    return evaluate_filter(csv_name, "kalman_new")
+    return evaluate_filter(csv_name, filename)
 
 #spherical_pendulum_sim.runSim()
 simulation_results = []

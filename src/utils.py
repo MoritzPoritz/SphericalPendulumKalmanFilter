@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from datetime import date, datetime
+from datetime import datetime
 
 def write_evaluation_to_csv(index, mse, mse_db, error_in_place, occ_start, occ_end,occ_dur, Q_var, meaned_kalman_var): 
     df = pd.DataFrame({
@@ -65,7 +65,7 @@ def write_to_csv(states, pos, Ts, name, vars):
             'position_z': pos[:,2],
             'timestep': Ts
             })
-    df.to_csv('data/'+name+str(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))+'.csv', sep=',')
+    df.to_csv('data/'+name+'.csv', sep=',')
 
 
 def read_from_csv(path):
