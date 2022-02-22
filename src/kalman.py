@@ -55,7 +55,6 @@ def f(x, dt):
 class PendulumUKF(): 
     def __init__(self, x, positions, dt, stdx, stdy, stdz, occStart, occEnd,Q_var):
         self.sigmas = MerweScaledSigmaPoints(4, alpha=.001, beta=2, kappa=-1)
-       
         self.std_x, self.std_y, self.std_z = stdx, stdy, stdz
         self.positions = positions
         self.occStart = occStart
