@@ -15,7 +15,7 @@ def f(t):
     return np.cos(2*np.pi*t) * np.exp(-t)
 
 
-def plot_simulation_and_kalman(simulation, kalman, messy):
+def plot_simulation_and_kalman(simulation, kalman, messy, occStart, occEnd):
     # Set up a figure twice as tall as it is wide
     fig = plt.figure(figsize=plt.figaspect(1.5))
     fig.suptitle('A tale of 2 subplots')
