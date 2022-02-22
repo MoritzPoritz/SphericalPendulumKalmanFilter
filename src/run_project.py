@@ -16,7 +16,7 @@ kstd_x, kstd_y, kstd_z = 0.02, 0.02, 0.02
 
 occStart = 1000
 occEnd = 10000
-occStep = 500
+occStep = 300
 
 iteration_count = int((occEnd - occStart) / occStep) 
 
@@ -35,14 +35,14 @@ def run_project(shall_plot, occStart, occEnd, csv_name, Q_var):
     #print("Filtered. Plotting:")
     if (shall_plot):
         results = plot_results.plot_results(["simulation", "kalman", "messy"], occStart, occEnd, kalman_filter.variances)
-    return evaluate_filter(csv_name, filename)
+    return evaluate_filter(csv_name, filename, kalman_filter.crashed)
 
 #spherical_pendulum_sim.runSim()
 simulation_results = []
 for i in range(iteration_count): 
-    mse, mse_db, error_in_place, meaned_kalman_var = run_project(False, occStart, occStart + occStep*i, csv_name, Q_var)
+    mse, mse_db, error_in_place, meaned_kalman_var, crashed = run_project(False, occStart, occStart + occStep*i, csv_name, Q_var)
     #mse, mse_db, error_in_place = run_project(True, occStart, occStart + occEnd)
-    simulation_results.append([i, mse, mse_db, error_in_place, occStart, occStart + occStep*i,(occStart + occStep*i) - occStart, Q_var, meaned_kalman_var])
+    simulation_results.append([i, mse, mse_db, error_in_place, occStart, occStart + occStep*i,(occStart + occStep*i) - occStart, Q_var, meaned_kalman_var, crashed])
     #simulation_results.append([i, mse, mse_db, error_in_place, occStart, occEnd,500])
 simulation_results = np.array(simulation_results)
-utils.write_evaluation_to_csv(simulation_results[:,0], simulation_results[:,1], simulation_results[:,2], simulation_results[:,3], simulation_results[:,4], simulation_results[:,5], simulation_results[:,6], simulation_results[:,7],simulation_results[:,8])
+utils.write_evaluation_to_csv(simulation_results[:,0], simulation_results[:,1], simulation_results[:,2], simulation_results[:,3], simulation_results[:,4], simulation_results[:,5], simulation_results[:,6], simulation_results[:,7],simulation_results[:,8],simulation_results[:,9])

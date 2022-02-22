@@ -9,7 +9,7 @@ import utils
 import numpy as np
 
 
-def evaluate_filter(ground_truth, kalman): 
+def evaluate_filter(ground_truth, kalman, crashed, crashed_at): 
     ground_truth_data = utils.read_from_csv(ground_truth+'.csv') # grounn truth
     kalman_data = utils.read_from_csv(kalman+'.csv') # kalman
     if ground_truth_data.empty is False and kalman_data.empty is False:
@@ -43,4 +43,4 @@ def evaluate_filter(ground_truth, kalman):
         error_in_place = in_std_count/len(meaned_filter_std)*100
         print("STD of values is in range: " + str(error_in_place) + " percent of the time")  
 
-        return mse, mse_db, error_in_place, meaned_variance
+        return mse, mse_db, error_in_place, meaned_variance, crashed, crashed_at

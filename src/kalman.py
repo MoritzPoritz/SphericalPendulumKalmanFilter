@@ -68,6 +68,8 @@ class PendulumUKF():
         self.ukf.R = np.diag([self.std_x**2, self.std_y**2, self.std_z**2])
         self.ukf.Q[0:2, 0:2] = Q_discrete_white_noise(2,dt=dt, var=Q_var)
         self.ukf.Q[2:4, 2:4] = Q_discrete_white_noise(2,dt=dt, var=Q_var)
+        self.crashed = False
+        self.crashed_at = 0
 
     
     def run(self):
@@ -77,7 +79,6 @@ class PendulumUKF():
         for idx, p in enumerate(self.positions):
             if (idx % 100 == 0): 
                 print(idx, self.ukf.x)
-
 
             try:
                 self.ukf.predict()
@@ -91,6 +92,8 @@ class PendulumUKF():
                 #print(self.ukf.x)
                 uxs.append([0,0,0,0])
                 ps.append([0,0,0,0])
+                self.crashed = True
+                self.crashed_at = idx
 
         print("Filtering took %.2f Minutes", str(time.time() - last_time))
                 
