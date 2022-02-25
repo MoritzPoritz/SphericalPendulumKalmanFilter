@@ -1,2 +1,2 @@
 theta,phi,dtheta,dphi,pendulum__length,timestep,sim_time
-72, 23, 0, 48, 0.5, 0.01, 10
+72, 23, 0, 48, 0.64, 0.01, 10

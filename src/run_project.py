@@ -50,14 +50,14 @@ def run_mse_evaluation():
     utils.write_evaluation_to_csv(simulation_results[:,0], simulation_results[:,1], simulation_results[:,2], simulation_results[:,3], simulation_results[:,4], simulation_results[:,5], simulation_results[:,6], simulation_results[:,7],simulation_results[:,8],simulation_results[:,9], simulation_results[:,10])
 
 def run_Q_evaluation():
-    qvar_start = 0
-    qvar_end = 2
+    qvar_start = 1.4
+    qvar_end = 1.5
     qvar_step = 0.1
     q_eval_iter = int((qvar_end - qvar_start)/qvar_step)
     for i in range(q_eval_iter):
         print("Evaluation for Q: " + str(qvar_start + (qvar_step * i)))
-        kalman_filter, filename = kalman.runFilter(kstd_x, kstd_y, kstd_z, occStart, occEnd, "CleanedOptitrack_3_perfect_flower", qvar_start + (qvar_step * i))
-        evaluate_filter("CleanedOptitrack_3_perfect_flower", filename, kalman_filter)
+        kalman_filter, filename = kalman.runFilter(kstd_x, kstd_y, kstd_z, occStart, occEnd, "CleanedOptitrack_3_perfect_flower_with_polar", qvar_start + (qvar_step * i))
+        evaluate_filter("CleanedOptitrack_3_perfect_flower_with_polar", filename, kalman_filter)
 
 if __name__ == "__main__":
     if (len(sys.argv) == 2): 

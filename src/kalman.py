@@ -17,8 +17,8 @@ from datetime import datetime
 DEG_TO_RAD = math.pi/180
 RAD_TO_DEG = 180/math.pi
 gravitation = 9.81
-l = 0.643974
-
+#l = 0.643974
+l = 0.64
 def state_first_deriv(x):
     dq = x[2:]
     dq2 = second_deriv_theta_phi(x)

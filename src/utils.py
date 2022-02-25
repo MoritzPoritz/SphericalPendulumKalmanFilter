@@ -26,7 +26,7 @@ def polar_to_kartesian(r, theta, phi):
 
 def cartesian_to_polar(x,y,z): 
     theta = np.arctan(y/x)
-    phi = np.arctan(np.sqrt(x**2+y**2)/z)
+    phi = np.arccos(z/np.sqrt(x**2+y**2+z**2))
     return theta, phi
 
 def write_to_csv(states, pos, Ts, name, vars):
