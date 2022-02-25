@@ -1,6 +1,6 @@
 import matplotlib
 from sympy import S
-matplotlib.use('Qt5Agg')
+#matplotlib.use('Qt5Agg')
 
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d.axes3d as p3
@@ -180,7 +180,7 @@ def plot_tracking_and_kalman(tracking, kalman, occStart, occEnd):
         for i in range(len(kalman['timestep'])): 
             # Get mean std and error values for state (given by filter) and measurement data (given by filter)
             meaned_filter_std.append((np.sqrt(var_theta[i]) + np.sqrt(var_phi[i]) + np.sqrt(var_dtheta[i]) + np.sqrt(var_dphi[i]))/4)
-            meaned_real_std.append(rx[i] + ry[i] + rz[i])
+            meaned_real_std.append((rx[i] + ry[i] + rz[i])/3)
             # calculate angles from tracking data for plotting
             t,p = utils.cartesian_to_polar(tracking["position_x"][i], tracking['position_y'][i], tracking['position_z'][i])
             theta.append(t)
@@ -199,19 +199,20 @@ def plot_tracking_and_kalman(tracking, kalman, occStart, occEnd):
         for i in range(len(meaned_filter_std)): 
             if (meaned_filter_std_minus[i] < meaned_real_std[i] < meaned_filter_std[i]): 
                 in_std_count+=1
-        print("STD of values is in range: " + str(in_std_count/len(meaned_filter_std)*100) + " of the time")        
+        mse_in_filter_std = round(in_std_count/len(meaned_filter_std)*100,2)
+        print("STD of values is in range: " + str(mse_in_filter_std) + " of the time")        
 
         # Print kalman mse and data mse    
         #kalman_mse_db = np.log10(kalman_mse)*10
         print("Kalman MSE: Error %.20f " %kalman_mse)
         print("Measurement MSE: Error %.20f " %mse)
 
-        ax = fig.add_subplot(2, 1, 2)
+        ax = fig.add_subplot(1, 1, 1)
         # Plotting needs to be limited by the time frame, filter works (thats why on x axis data2['timestep'] (filter result) is used)
         ax.plot(kalman['timestep'],meaned_filter_std, color="orange", label="Std")
         ax.plot(kalman['timestep'],meaned_filter_std_minus, color="orange",label="Std")
         #plot sum of error on tracking data to filter data
-        ax.plot(kalman['timestep'],(rx + ry + rz), label="Sum of Errors")
+        ax.plot(kalman['timestep'],meaned_real_std, label="Summe der Fehler")
         #ax.plot((rx + ry + rz)/3, label="Sum of Errors")
         
         # Additionally plot angles theta and phi
@@ -224,8 +225,8 @@ def plot_tracking_and_kalman(tracking, kalman, occStart, occEnd):
         
         # plot residual
         ax.legend()
-        ax.set_title("Residual Plot (Error %.2fdB)" %mse_db)
-        ax.set_xlabel("Time [s]")
+        ax.set_title("Residual Plot (Error %.2fdB)" %mse_db + " " + ", Fehler ist zu " + str(mse_in_filter_std) + "% in der angegebenen Std des Filters")
+        ax.set_xlabel("Zeit [s]")
         ax.set_ylabel("Residual [m]")
         ax.set_ylim(-.25,.25)
         ax.grid(True)
@@ -233,7 +234,7 @@ def plot_tracking_and_kalman(tracking, kalman, occStart, occEnd):
     '''
     Second Subplot: 
     Showing the path of the pendulum
-    '''
+    
     ax = fig.add_subplot(2,1,1, projection='3d')
 
     if tracking.empty is False and kalman.empty is False:
@@ -258,14 +259,14 @@ def plot_tracking_and_kalman(tracking, kalman, occStart, occEnd):
         ax.plot(t_position_x[0:len(k_position_x)-1], t_position_y[0:len(k_position_y)-1], t_position_z[0:len(k_position_z)-1], color='green', linewidth=1, alpha=0.8, label='Tracking')
 
         ax.plot(k_position_x[0:occStart], k_position_y[0:occStart], k_position_z[0:occStart], 
-            color='blue', linewidth=0.6, alpha=0.6, label="Kalman Filter with data before occlusion")
+            color='blue', linewidth=0.6, alpha=0.6, label="Kalman-Filter mit Daten vor Verdeckung")
         print(occStart, occEnd)
         ax.plot(k_position_x[occStart:occEnd], k_position_y[occStart:occEnd], k_position_z[occStart:occEnd],
-            color='red', linewidth=0.9, label="Kalman Prediction only")
+            color='red', linewidth=0.9, label="Nur Kalman Vorhersage")
 
         ax.plot(k_position_x[occEnd:], k_position_y[occEnd:], k_position_z[occEnd:], 
-            color='blue', linewidth=0.6, alpha=0.6, label="Kalman Filter with data after occlusion")
-
+            color='blue', linewidth=0.6, alpha=0.6, label="Kalman-Filter mit Daten nach Verdeckung")
+    '''
     plt.legend()
     plt.show()
 

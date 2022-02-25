@@ -75,9 +75,10 @@ class PendulumUKF():
         uxs = []
         ps = []
         last_time = time.time()
+        set_crashed_at = False
         for idx, p in enumerate(self.positions):
-            if (idx % 100 == 0): 
-                print(idx, self.ukf.x)
+            #if (idx % 1000 == 0): 
+             #   print(idx, self.ukf.x)
 
             try:
                 self.ukf.predict()
@@ -92,9 +93,11 @@ class PendulumUKF():
                 uxs.append([0,0,0,0])
                 ps.append([0,0,0,0])
                 self.crashed = True
-                self.crashed_at = idx
+                if (not set_crashed_at): 
+                    self.crashed_at = idx
+                    set_crashed_at = True
 
-        print("Filtering took %.2f Minutes", str(time.time() - last_time))
+        #print("Filtering took %.2f Minutes", str(time.time() - last_time))
                 
         uxs = np.array(uxs)
         ps = np.array(ps)
